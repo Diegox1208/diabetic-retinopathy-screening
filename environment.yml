@@ -12,3 +12,4 @@ dependencies:
   - matplotlib
   - tqdm
   - kaggle
+  - unzip                # stage 01 extracts the APTOS archive; missing on a fresh WSL
