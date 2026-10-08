@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+#### created by Diego G. Salas, 2026-10-08
+#### adapted from: notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cells "Mirar los datos" to "Control de seguridad"
+#
+# Stage 02: put every dataset in one schema and drop images whose file is missing.
+# Schema: image_id, source_dataset, file_path, icdr_grade, referable, patient_id, eye, device.
+
+import argparse
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+import retina
+
+##### Getopts #####
+#-----------------------------------------------------------
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--raw", required=True, help="folder with one subfolder per dataset name")
+parser.add_argument("--info", required=True, help="datasets.tsv with columns dataset name accession source")
+parser.add_argument("--out", required=True, help="output manifest, TSV")
+parser.add_argument("--summary", required=True, help="output table of images per dataset and grade, TSV")
+args = parser.parse_args()
+
+raw_dir = Path(args.raw)
+if not raw_dir.is_dir():
+    print(f"/!\\ Error : {raw_dir} does not exist; run stage 01 first", file=sys.stderr)
+    sys.exit(1)
+
+##### Functions #####
+#-----------------------------------------------------------
+def read_aptos(folder):
+    # APTOS 2019: train.csv with id_code, diagnosis; images in train_images/<id>.png. No patient id.
+    t = pd.read_csv(folder / "train.csv")
+    return pd.DataFrame({
+        "image_id": t["id_code"].astype(str),
+        "file_path": [str(folder / "train_images" / f"{i}.png") for i in t["id_code"]],
+        "icdr_grade": t["diagnosis"].astype(int),
+        "patient_id": t["id_code"].astype(str),       # one image per patient is the only safe assumption
+        "eye": "unknown",
+    })
+
+
+def read_eyepacs(folder):
+    # EyePACS (Kaggle copy): etiquetas.csv with image_id, icdr_grade, patient_id, ojo; images <id>.jpg next to it.
+    found = sorted(folder.rglob("etiquetas.csv"))
+    if not found:
+        raise FileNotFoundError(f"no etiquetas.csv under {folder}")
+    t = pd.read_csv(found[0])
+    return pd.DataFrame({
+        "image_id": t["image_id"].astype(str),
+        "file_path": [str(found[0].parent / f"{i}.jpg") for i in t["image_id"]],
+        "icdr_grade": t["icdr_grade"].astype(int),
+        "patient_id": t["patient_id"].astype(str),
+        "eye": t["ojo"].astype(str),
+    })
+
+
+readers = {"APTOS2019": read_aptos, "EyePACS": read_eyepacs}
+
+##### Data files #####
+#-----------------------------------------------------------
+with retina.Timer("Data files"):
+    info = pd.read_csv(args.info, sep="\t")
+    tables = []
+    for row in info.itertuples():
+        if row.dataset not in readers:
+            print(f"/!\\ Error : no reader for dataset {row.dataset}", file=sys.stderr)
+            sys.exit(1)
+        folder = raw_dir / row.name
+        if not folder.is_dir():
+            print(f"[02_manifest] missing {folder}, skipping {row.dataset}", file=sys.stderr)
+            continue
+        t = readers[row.dataset](folder)
+        t.insert(1, "source_dataset", row.dataset)
+        t["device"] = "desktop_camera"
+        tables.append(t)
+    if not tables:
+        print("/!\\ Error : no dataset found", file=sys.stderr)
+        sys.exit(1)
+    df = pd.concat(tables, ignore_index=True)
+
+##### Analysis #####
+#-----------------------------------------------------------
+with retina.Timer("Analysis"):
+    # Patient ids are prefixed with the source: EyePACS ids are numbers, APTOS ids are hashes.
+    df["patient_id"] = df["source_dataset"] + "_" + df["patient_id"]
+    df["referable"] = (df["icdr_grade"] >= 2).astype(int)
+
+    exists = df["file_path"].map(lambda p: Path(p).is_file())
+    for r in df[~exists].itertuples():
+        print(f"[02_manifest] missing file, dropped: {r.source_dataset} {r.image_id}", file=sys.stderr)
+    dropped = df[~exists].groupby("source_dataset").size()
+    df = df[exists].reset_index(drop=True)
+
+    if df.duplicated(["source_dataset", "image_id"]).any():
+        print("/!\\ Error : duplicated images in the manifest", file=sys.stderr)
+        sys.exit(1)
+    if df[["image_id", "icdr_grade", "patient_id", "referable"]].isna().any().any():
+        print("/!\\ Error : missing values in key columns", file=sys.stderr)
+        sys.exit(1)
+
+##### Table #####
+#-----------------------------------------------------------
+summary = (df.pivot_table(index="source_dataset", columns="icdr_grade", values="image_id",
+                          aggfunc="count", fill_value=0)
+             .rename(columns=lambda g: f"grade_{g}"))
+summary["images"] = summary.sum(axis=1)
+summary["referable"] = df.groupby("source_dataset")["referable"].sum()
+summary["patients"] = df.groupby("source_dataset")["patient_id"].nunique()
+summary["dropped_missing_file"] = dropped.reindex(summary.index, fill_value=0)
+print(summary.to_string())
+
+##### Saving data #####
+#-----------------------------------------------------------
+Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+df.to_csv(args.out, sep="\t", index=False)
+summary.reset_index().to_csv(args.summary, sep="\t", index=False)
+print(f"Saved {args.out} ({len(df)} images) and {args.summary}")
