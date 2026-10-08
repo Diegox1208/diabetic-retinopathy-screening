@@ -86,8 +86,10 @@ def parse_history(text):
 
 
 def parse_split(text):
-    sizes = dict(re.findall(r"(Entrenamiento|Validación|Prueba)\s*:\s*(\d+) fotos", text))
-    return {k: int(v) for k, v in sizes.items()}
+    # "Entrenamiento : 27706 fotos | referibles: 21%" -> {"train": (27706, 0.21), ...}
+    names = {"Entrenamiento": "train", "Validación": "val", "Prueba": "test"}
+    found = re.findall(r"(Entrenamiento|Validación|Prueba)\s*:\s*(\d+) fotos \| referibles: (\d+)%", text)
+    return {names[k]: (int(n), int(r) / 100) for k, n, r in found}
 
 #---- ##-- Data files ----
 summary_rows, history_rows = [], []
@@ -104,7 +106,7 @@ for run in runs:
                    tp=t["matriz"]["tp"], fn=t["matriz"]["fn"], tn=t["matriz"]["tn"], fp=t["matriz"]["fp"])
         history = [dict(epoch=h["epoca"], train_loss=h["perdida_train"], val_auroc=h["auc_val"], seconds="")
                    for h in card["historial"]]
-        split_test = ""
+        split = {}
     ##### model_v2 and model_v3: parse the printed outputs
     else:
         nb = json.loads((nb_dir / run["notebook"]).read_text(encoding="utf-8"))
@@ -115,7 +117,7 @@ for run in runs:
             print(f"/!\\ Error : no test block in {run['notebook']}", file=sys.stderr)
             sys.exit(1)
         history = parse_history(text)
-        split_test = parse_split(text).get("Prueba", "")
+        split = parse_split(text)
         ##### Figures, located by the code that drew them
         tag = run["version"]
         for c in code:
@@ -136,7 +138,9 @@ for run in runs:
 
     best = max(history, key=lambda h: h["val_auroc"])
     summary_rows.append(dict(version=run["version"], date=run["date"], data=run["data"], split=run["split"],
-                             split_test_printed=split_test, **row,
+                             **{f"printed_{k}_images": split.get(k, ("", ""))[0] for k in ("train", "val", "test")},
+                             **{f"printed_{k}_referable": split.get(k, ("", ""))[1] for k in ("train", "val", "test")},
+                             **row,
                              best_val_auroc=round(best["val_auroc"], 4), best_epoch=best["epoch"],
                              source=run["source"]))
     history_rows += [dict(version=run["version"], **h) for h in history]

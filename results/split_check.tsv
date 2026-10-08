@@ -1,0 +1,4 @@
+split	images_rebuilt	images_colab	referable_rebuilt	referable_colab	aptos	eyepacs	referable_images	fingerprint	match
+train	27705	27706	0.22	0.21	2617	25088	5972	4450ac1fa14470eae6547f4c4ede5564	False
+val	5541	5541	0.22	0.21	524	5017	1194	77816eaa36269dc2914ba49a8c66b19c	False
+test	5541	5540	0.22	0.22	521	5020	1194	0c9048d144764bcd2db1fd3583cbb686	False
