@@ -1,0 +1,105 @@
+{
+  "version": "model_v1",
+  "fecha": "2026-09-22T22:01:35",
+  "datos": "APTOS2019 (train 70% / val 15% / test 15%, estratificado por grado)",
+  "tarea": "binaria: referible (ICDR>=2) vs no referible",
+  "config": {
+    "tam_imagen": 384,
+    "batch": 32,
+    "epocas": 12,
+    "lr": 0.0003,
+    "semilla": 42,
+    "usar_clahe": false,
+    "modelo": "efficientnet_b0",
+    "version": "model_v1",
+    "sensibilidad_objetivo": 0.9
+  },
+  "umbral": 0.4445949196815491,
+  "test": {
+    "n": 550,
+    "referibles": 223,
+    "auroc": [
+      0.9809,
+      0.9719,
+      0.9893
+    ],
+    "sensibilidad": [
+      0.9417,
+      0.9028,
+      0.9656
+    ],
+    "especificidad": [
+      0.9144,
+      0.879,
+      0.9401
+    ],
+    "matriz": {
+      "tn": 299,
+      "fp": 28,
+      "fn": 13,
+      "tp": 210
+    }
+  },
+  "historial": [
+    {
+      "epoca": 1,
+      "perdida_train": 0.7790272247265709,
+      "auc_val": 0.9625436738287161
+    },
+    {
+      "epoca": 2,
+      "perdida_train": 0.34461795549419677,
+      "auc_val": 0.9716085724504113
+    },
+    {
+      "epoca": 3,
+      "perdida_train": 0.1965536229047885,
+      "auc_val": 0.9761754106027676
+    },
+    {
+      "epoca": 4,
+      "perdida_train": 0.1373879082714251,
+      "auc_val": 0.9717461278164461
+    },
+    {
+      "epoca": 5,
+      "perdida_train": 0.11036076680133922,
+      "auc_val": 0.9765468100910616
+    },
+    {
+      "epoca": 6,
+      "perdida_train": 0.1480487385940772,
+      "auc_val": 0.9751643786624116
+    },
+    {
+      "epoca": 7,
+      "perdida_train": 0.10318732263983296,
+      "auc_val": 0.9772483424578392
+    },
+    {
+      "epoca": 8,
+      "perdida_train": 0.06301030675999433,
+      "auc_val": 0.9756251891386283
+    },
+    {
+      "epoca": 9,
+      "perdida_train": 0.05729109061052685,
+      "auc_val": 0.9785482406668684
+    },
+    {
+      "epoca": 10,
+      "perdida_train": 0.0469976444839501,
+      "auc_val": 0.9782524966298936
+    },
+    {
+      "epoca": 11,
+      "perdida_train": 0.047994395171330646,
+      "auc_val": 0.9778329527634873
+    },
+    {
+      "epoca": 12,
+      "perdida_train": 0.04272450646512731,
+      "auc_val": 0.9782456188615918
+    }
+  ]
+}

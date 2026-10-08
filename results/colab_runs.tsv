@@ -1,0 +1,4 @@
+version	date	data	split	split_test_printed	threshold	n_test	referable_test	auroc	auroc_lo	auroc_hi	sens	sens_lo	sens_hi	spec	spec_lo	spec_hi	tp	fn	tn	fp	best_val_auroc	best_epoch	source
+model_v1	2026-09-22	APTOS2019	per image, 70/15/15, stratified by grade		0.4445949196815491	550	223	0.9809	0.9719	0.9893	0.9417	0.9028	0.9656	0.9144	0.879	0.9401	210	13	299	28	0.9785	9	results/model_v1.json
+model_v2	2026-10-06	APTOS2019 + EyePACS	per patient, StratifiedGroupKFold 6/7 then 5/6	5540	0.021	5018	1013	0.924	0.913	0.934	0.901	0.881	0.918	0.732	0.718	0.746	913	100	2932	1073	0.9265	6	notebooks/RD_01_primer_modelo_APTOS.ipynb
+model_v3	2026-10-07	APTOS2019 + EyePACS	per patient, StratifiedGroupKFold 6/7 then 5/6	5540	0.057	5540	1226	0.93	0.92	0.939	0.905	0.888	0.921	0.74	0.727	0.753	1110	116	3193	1121	0.9265	6	notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb
