@@ -64,7 +64,8 @@ def plot_confusion_roc(m, y, p, version, file):
     # Left: confusion matrix on a one-hue ramp. Right: ROC with the operating point labelled.
     blue, ink, muted, surface = "#2a78d6", "#1f1f1e", "#6b6b68", "#fcfcfb"
     ramp = LinearSegmentedColormap.from_list("blue", ["#cde2fb", "#104281"])
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.6), facecolor=surface)
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 5), facecolor=surface, layout="constrained",
+                                 gridspec_kw=dict(width_ratios=[1, 1.1]))
     c = m["confusion"]
     cells = np.array([[c["tn"], c["fp"]], [c["fn"], c["tp"]]])
     a1.imshow(cells, cmap=ramp)
@@ -83,8 +84,13 @@ def plot_confusion_roc(m, y, p, version, file):
     a2.plot(fpr, tpr, color=blue, linewidth=2)
     x0, y0 = 1 - m["specificity"][0], m["sensitivity"][0]
     a2.scatter([x0], [y0], s=64, color="#104281", edgecolor=surface, linewidth=2, zorder=3)
-    a2.annotate(f"threshold: sens {y0:.1%}, spec {1 - x0:.1%}", (x0, y0), xytext=(12, -18),
-                textcoords="offset points", color=ink, fontsize=9)
+    # Label inside the axes: to the right of the point, or to the left past the middle.
+    right = x0 < 0.5
+    a2.annotate(f"threshold\nsens {y0:.1%} · spec {1 - x0:.1%}", (x0, y0), xytext=(12 if right else -12, -28),
+                textcoords="offset points", ha="left" if right else "right", color=ink, fontsize=9)
+    a2.set_xlim(-0.02, 1.02)
+    a2.set_ylim(-0.02, 1.02)
+    a2.set_aspect("equal")
     a2.set_xlabel("1 − specificity", color=ink)
     a2.set_ylabel("sensitivity", color=ink)
     a2.set_title(f"ROC, test · {version} · AUROC {m['auroc'][0]:.3f}", color=ink, loc="left")
@@ -93,7 +99,6 @@ def plot_confusion_roc(m, y, p, version, file):
         a.set_facecolor(surface)
         for s in a.spines.values():
             s.set_color("#d0d0cc")
-    fig.tight_layout()
     fig.savefig(file, dpi=120, facecolor=surface)
     plt.close(fig)
 
