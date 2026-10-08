@@ -1,0 +1,3 @@
+dataset	name	accession	source
+APTOS2019	aptos	competitions/aptos2019-blindness-detection	Kaggle; APTOS 2019 Blindness Detection, Asia Pacific Tele-Ophthalmology Society, 2019; 3 662 graded images
+EyePACS	eyepacs	datasets/cristbalmontoyabao/atros-dataset	Kaggle; EyePACS train set of the Diabetic Retinopathy Detection challenge (2015), 35 126 images resized to 384 px by C. Montoya; license not stated

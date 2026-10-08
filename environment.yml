@@ -1,0 +1,14 @@
+name: dr-referable-screening
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pytorch=2.*          # CPU build on the laptop; the full runs used a Colab T4 GPU
+  - torchvision
+  - timm
+  - opencv
+  - scikit-learn
+  - pandas
+  - matplotlib
+  - tqdm
+  - kaggle

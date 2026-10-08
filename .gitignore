@@ -1,0 +1,10 @@
+/data/
+/logs/
+/models/
+/tests/results/
+*.pt
+*.pt.tmp
+kaggle.json
+access_token
+.ipynb_checkpoints/
+__pycache__/
