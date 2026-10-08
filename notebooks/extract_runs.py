@@ -148,7 +148,7 @@ for run in runs:
 #---- ##-- Saving data ----
 def write_tsv(path, rows):
     with open(path, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()), delimiter="\t")
+        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()), delimiter="\t", lineterminator="\n")
         w.writeheader()
         w.writerows(rows)
     print(f"table\t{path}")
