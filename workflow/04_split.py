@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 
 import pandas as pd
-from sklearn.model_selection import StratifiedGroupKFold
 
 import retina
 
@@ -29,14 +28,6 @@ if not Path(args.manifest).is_file():
     print(f"/!\\ Error : {args.manifest} does not exist; run stage 03 first", file=sys.stderr)
     sys.exit(1)
 
-##### Functions #####
-#-----------------------------------------------------------
-def split_off(d, n_splits, seed):
-    # Returns (rest, one fold) of a StratifiedGroupKFold on grade, grouped by patient.
-    sgkf = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=seed)
-    rest_idx, fold_idx = next(sgkf.split(d, d["icdr_grade"], groups=d["patient_id"]))
-    return d.iloc[rest_idx], d.iloc[fold_idx]
-
 ##### Data files #####
 #-----------------------------------------------------------
 df = pd.read_csv(args.manifest, sep="\t", dtype={"image_id": str, "patient_id": str})
@@ -44,9 +35,7 @@ df = pd.read_csv(args.manifest, sep="\t", dtype={"image_id": str, "patient_id": 
 ##### Analysis #####
 #-----------------------------------------------------------
 with retina.Timer("Split"):
-    trainval, test = split_off(df, args.test_folds, args.seed)
-    train, val = split_off(trainval, args.val_folds, args.seed)
-    parts = {"train": train, "val": val, "test": test}
+    parts = retina.split_by_patient(df, args.test_folds, args.val_folds, args.seed)
 
     for a, b in [("train", "val"), ("train", "test"), ("val", "test")]:
         if set(parts[a]["patient_id"]) & set(parts[b]["patient_id"]):

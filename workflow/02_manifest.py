@@ -27,66 +27,28 @@ if not raw_dir.is_dir():
     print(f"/!\\ Error : {raw_dir} does not exist; run stage 01 first", file=sys.stderr)
     sys.exit(1)
 
-##### Functions #####
-#-----------------------------------------------------------
-def read_aptos(folder):
-    # APTOS 2019: train.csv with id_code, diagnosis; images in train_images/<id>.png. No patient id.
-    t = pd.read_csv(folder / "train.csv")
-    return pd.DataFrame({
-        "image_id": t["id_code"].astype(str),
-        "file_path": [str(folder / "train_images" / f"{i}.png") for i in t["id_code"]],
-        "icdr_grade": t["diagnosis"].astype(int),
-        "patient_id": t["id_code"].astype(str),       # one image per patient is the only safe assumption
-        "eye": "unknown",
-    })
-
-
-def read_eyepacs(folder):
-    # EyePACS (Kaggle copy): etiquetas.csv with image_id, icdr_grade, patient_id, ojo; images <id>.jpg next to it.
-    found = sorted(folder.rglob("etiquetas.csv"))
-    if not found:
-        raise FileNotFoundError(f"no etiquetas.csv under {folder}")
-    t = pd.read_csv(found[0])
-    return pd.DataFrame({
-        "image_id": t["image_id"].astype(str),
-        "file_path": [str(found[0].parent / f"{i}.jpg") for i in t["image_id"]],
-        "icdr_grade": t["icdr_grade"].astype(int),
-        "patient_id": t["patient_id"].astype(str),
-        "eye": t["ojo"].astype(str),
-    })
-
-
-readers = {"APTOS2019": read_aptos, "EyePACS": read_eyepacs}
-
 ##### Data files #####
 #-----------------------------------------------------------
 with retina.Timer("Data files"):
     info = pd.read_csv(args.info, sep="\t")
-    tables = []
+    tables = {}
     for row in info.itertuples():
-        if row.dataset not in readers:
+        if row.dataset not in retina.READERS:
             print(f"/!\\ Error : no reader for dataset {row.dataset}", file=sys.stderr)
             sys.exit(1)
         folder = raw_dir / row.name
         if not folder.is_dir():
             print(f"[02_manifest] missing {folder}, skipping {row.dataset}", file=sys.stderr)
             continue
-        t = readers[row.dataset](folder)
-        t.insert(1, "source_dataset", row.dataset)
-        t["device"] = "desktop_camera"
-        tables.append(t)
+        tables[row.dataset] = retina.READERS[row.dataset](folder)
     if not tables:
         print("/!\\ Error : no dataset found", file=sys.stderr)
         sys.exit(1)
-    df = pd.concat(tables, ignore_index=True)
+    df = retina.unify(tables)
 
 ##### Analysis #####
 #-----------------------------------------------------------
 with retina.Timer("Analysis"):
-    # Patient ids are prefixed with the source: EyePACS ids are numbers, APTOS ids are hashes.
-    df["patient_id"] = df["source_dataset"] + "_" + df["patient_id"]
-    df["referable"] = (df["icdr_grade"] >= 2).astype(int)
-
     exists = df["file_path"].map(lambda p: Path(p).is_file())
     for r in df[~exists].itertuples():
         print(f"[02_manifest] missing file, dropped: {r.source_dataset} {r.image_id}", file=sys.stderr)

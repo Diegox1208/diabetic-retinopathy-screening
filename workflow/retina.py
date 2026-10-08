@@ -7,12 +7,15 @@
 import hashlib
 import random
 import time
+from pathlib import Path
 
 import cv2
 import numpy as np
+import pandas as pd
 import torch
 from PIL import Image
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import StratifiedGroupKFold
 from torch.utils.data import Dataset
 from torchvision import transforms
 
@@ -53,6 +56,78 @@ def resolve_device(device):
 def fingerprint(image_ids):
     # MD5 of the sorted image ids: proves a resumed run sees the same split.
     return hashlib.md5("|".join(sorted(map(str, image_ids))).encode()).hexdigest()
+
+
+##### Dataset readers #####
+#-----------------------------------------------------------
+# Each reader returns image_id, file_path, icdr_grade, patient_id, eye. Files are not opened here.
+def read_aptos(folder):
+    # APTOS 2019: train.csv with id_code, diagnosis; images in train_images/<id>.png. No patient id.
+    t = pd.read_csv(Path(folder) / "train.csv")
+    return pd.DataFrame({
+        "image_id": t["id_code"].astype(str),
+        "file_path": [str(Path(folder) / "train_images" / f"{i}.png") for i in t["id_code"]],
+        "icdr_grade": t["diagnosis"].astype(int),
+        "patient_id": t["id_code"].astype(str),       # one image per patient is the only safe assumption
+        "eye": "unknown",
+    })
+
+
+def read_eyepacs(folder):
+    # EyePACS, two layouts: the 384 px Kaggle copy (etiquetas.csv: image_id, icdr_grade, patient_id, ojo;
+    # <id>.jpg next to it) or the 2015 competition (trainLabels.csv: image, level; train/<id>.jpeg).
+    folder = Path(folder)
+    copy = sorted(folder.rglob("etiquetas.csv"))
+    if copy:
+        t = pd.read_csv(copy[0])
+        return pd.DataFrame({
+            "image_id": t["image_id"].astype(str),
+            "file_path": [str(copy[0].parent / f"{i}.jpg") for i in t["image_id"]],
+            "icdr_grade": t["icdr_grade"].astype(int),
+            "patient_id": t["patient_id"].astype(str),
+            "eye": t["ojo"].astype(str),
+        })
+    original = sorted(folder.rglob("trainLabels.csv"))
+    if original:
+        t = pd.read_csv(original[0])
+        parts = t["image"].str.rsplit("_", n=1, expand=True)
+        return pd.DataFrame({
+            "image_id": t["image"].astype(str),
+            "file_path": [str(original[0].parent / "train" / f"{i}.jpeg") for i in t["image"]],
+            "icdr_grade": t["level"].astype(int),
+            "patient_id": parts[0],
+            "eye": parts[1],
+        })
+    raise FileNotFoundError(f"no etiquetas.csv or trainLabels.csv under {folder}")
+
+
+READERS = {"APTOS2019": read_aptos, "EyePACS": read_eyepacs}
+
+
+def unify(tables):
+    # Concatenates {dataset: table}; prefixes patient ids with the source (EyePACS ids are numbers,
+    # APTOS ids are hashes) and adds the binary label.
+    df = pd.concat([t.assign(source_dataset=name) for name, t in tables.items()], ignore_index=True)
+    df["patient_id"] = df["source_dataset"] + "_" + df["patient_id"].astype(str)
+    df["referable"] = (df["icdr_grade"] >= 2).astype(int)
+    df["device"] = "desktop_camera"
+    return df[["image_id", "source_dataset", "file_path", "icdr_grade", "referable", "patient_id", "eye", "device"]]
+
+
+##### Split #####
+#-----------------------------------------------------------
+def split_off(d, n_splits, seed):
+    # Returns (rest, one fold) of a StratifiedGroupKFold on grade, grouped by patient.
+    sgkf = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+    rest_idx, fold_idx = next(sgkf.split(d, d["icdr_grade"], groups=d["patient_id"]))
+    return d.iloc[rest_idx], d.iloc[fold_idx]
+
+
+def split_by_patient(df, test_folds=7, val_folds=6, seed=42):
+    # Test first (1 of test_folds), then validation (1 of val_folds of the rest). Same calls as model_v3.
+    trainval, test = split_off(df, test_folds, seed)
+    train, val = split_off(trainval, val_folds, seed)
+    return {"train": train, "val": val, "test": test}
 
 
 ##### Preprocessing #####
@@ -134,7 +209,7 @@ def wilson(successes, total, z=1.96):
     p = successes / total
     centre = (p + z**2 / (2 * total)) / (1 + z**2 / total)
     margin = z * np.sqrt(p * (1 - p) / total + z**2 / (4 * total**2)) / (1 + z**2 / total)
-    return p, centre - margin, centre + margin
+    return p, max(0.0, centre - margin), min(1.0, centre + margin)      # clip float noise at 0 and 1
 
 
 def auroc_bootstrap(y, p, n=1000, seed=0):
