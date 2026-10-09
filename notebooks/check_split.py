@@ -2,7 +2,7 @@
 #### created by Diego G. Salas
 #
 # Checks that workflow/retina.py rebuilds the model_v3 patient split from labels alone.
-# StratifiedGroupKFold depends only on the set of (patient, grade) pairs, so no image is needed.
+# StratifiedGroupKFold depends only on the set of patient-grade pairs, so no image is needed.
 #   python notebooks/check_split.py --aptos <dir with train.csv> --eyepacs <dir with trainLabels.csv>
 
 import argparse

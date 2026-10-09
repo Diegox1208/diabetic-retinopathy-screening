@@ -1,5 +1,5 @@
 #### created by Diego G. Salas
-#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb (Colab)
+#### adapted from the Colab notebook notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb
 #
 # Functions shared by the numbered stages for preprocessing, dataset, prediction and metrics.
 # Imported as `import retina` by the scripts in workflow/.
@@ -74,8 +74,9 @@ def read_aptos(folder):
 
 
 def read_eyepacs(folder):
-    # EyePACS comes in two layouts. The 384 px Kaggle copy has etiquetas.csv (image_id, icdr_grade, patient_id, ojo)
-    # with <id>.jpg next to it, the original Kaggle competition has trainLabels.csv (image, level) and train/<id>.jpeg.
+    # EyePACS comes in two layouts. The 384 px Kaggle copy has etiquetas.csv with image_id, icdr_grade, patient_id
+    # and ojo, and <id>.jpg next to it. The original Kaggle competition has trainLabels.csv with image and level,
+    # and train/<id>.jpeg.
     folder = Path(folder)
     copy = sorted(folder.rglob("etiquetas.csv"))
     if copy:
@@ -105,8 +106,8 @@ READERS = {"APTOS2019": read_aptos, "EyePACS": read_eyepacs}
 
 
 def unify(tables):
-    # Concatenates the table of each dataset, prefixes patient ids with the source (EyePACS ids are numbers,
-    # APTOS ids are hashes) and adds the binary label.
+    # Concatenates the table of each dataset, prefixes patient ids with the source because EyePACS ids
+    # are numbers and APTOS ids are hashes, and adds the binary label.
     df = pd.concat([t.assign(source_dataset=name) for name, t in tables.items()], ignore_index=True)
     df["patient_id"] = df["source_dataset"] + "_" + df["patient_id"].astype(str)
     df["referable"] = (df["icdr_grade"] >= 2).astype(int)
@@ -117,14 +118,14 @@ def unify(tables):
 ##### Split #####
 #-----------------------------------------------------------
 def split_off(d, n_splits, seed):
-    # Returns (rest, one fold) of a StratifiedGroupKFold on grade, grouped by patient.
+    # Returns the rest and one fold of a StratifiedGroupKFold on grade, grouped by patient.
     sgkf = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=seed)
     rest_idx, fold_idx = next(sgkf.split(d, d["icdr_grade"], groups=d["patient_id"]))
     return d.iloc[rest_idx], d.iloc[fold_idx]
 
 
 def split_by_patient(df, test_folds=7, val_folds=6, seed=42):
-    # Test first (1 of test_folds), then validation (1 of val_folds of the rest). Same calls as model_v3.
+    # Test first as 1 of test_folds, then validation as 1 of val_folds of the rest. Same calls as model_v3.
     trainval, test = split_off(df, test_folds, seed)
     train, val = split_off(trainval, val_folds, seed)
     return {"train": train, "val": val, "test": test}
@@ -173,7 +174,7 @@ def build_transforms(train):
 
 
 class RetinaDataset(Dataset):
-    # Yields (image tensor, referable label) from a table with columns prep_path, referable.
+    # Yields an image tensor and its referable label from a table with columns prep_path, referable.
     def __init__(self, table, transform):
         self.table = table.reset_index(drop=True)
         self.transform = transform
@@ -190,7 +191,7 @@ class RetinaDataset(Dataset):
 ##### Prediction #####
 #-----------------------------------------------------------
 def predict(model, loader, device):
-    # Returns (probabilities, labels) as numpy arrays.
+    # Returns probabilities and labels as numpy arrays.
     model.eval()
     probs, labels = [], []
     with torch.no_grad(), torch.autocast(device_type=device.type, enabled=device.type == "cuda"):

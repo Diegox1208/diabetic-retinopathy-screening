@@ -2,7 +2,7 @@
 #### created by Diego G. Salas
 
 # Extracts the metrics, training history and figures of the three Colab runs
-# (model_v1, model_v2, model_v3) into results/. Standard library only.
+# model_v1, model_v2 and model_v3 into results/. Standard library only.
 #   python notebooks/extract_runs.py
 
 import argparse
@@ -26,7 +26,7 @@ results_dir = Path(args.results)
 fig_dir = results_dir / "figures"
 fig_dir.mkdir(parents=True, exist_ok=True)
 
-# Each Colab run: which notebook printed it, and what data and split it used.
+# Each Colab run, with the notebook that printed it and the data and split it used.
 runs = [
     dict(version="model_v1", source="results/model_v1.json", notebook=None,
          data="APTOS2019", split="per image, 70/15/15, stratified by grade"),
@@ -85,7 +85,7 @@ def parse_history(text):
 
 
 def parse_split(text):
-    # "Entrenamiento : 27706 fotos | referibles: 21%" -> {"train": (27706, 0.21), ...}
+    # Reads the image count and referable share of each split from the printed output.
     names = {"Entrenamiento": "train", "Validación": "val", "Prueba": "test"}
     found = re.findall(r"(Entrenamiento|Validación|Prueba)\s*:\s*(\d+) fotos \| referibles: (\d+)%", text)
     return {names[k]: (int(n), int(r) / 100) for k, n, r in found}
@@ -94,7 +94,7 @@ def parse_split(text):
 summary_rows, history_rows = [], []
 
 for run in runs:
-    ##### model_v1: the model card saved by the notebook is the only record
+    ##### model_v1, the model card saved by the notebook is the only record
     if run["notebook"] is None:
         card = json.loads((results_dir / "model_v1.json").read_text(encoding="utf-8"))
         t = card["test"]
@@ -106,7 +106,7 @@ for run in runs:
         history = [dict(epoch=h["epoca"], train_loss=h["perdida_train"], val_auroc=h["auc_val"], seconds="")
                    for h in card["historial"]]
         split = {}
-    ##### model_v2 and model_v3: parse the printed outputs
+    ##### model_v2 and model_v3, parse the printed outputs
     else:
         nb = json.loads((nb_dir / run["notebook"]).read_text(encoding="utf-8"))
         code = [c for c in nb["cells"] if c["cell_type"] == "code"]

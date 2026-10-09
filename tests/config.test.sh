@@ -1,5 +1,5 @@
 #### created by Diego G. Salas
-#### Test configuration with the same variables as config/config.sh, pointing at tests/data (< 1 MB, synthetic).
+#### Test configuration with the same variables as config/config.sh, pointing at tests/data, synthetic and under 1 MB.
 #### Small images, two epochs, no pretrained weights. It checks that every stage runs, not that the model learns.
 
 ##### Set variables

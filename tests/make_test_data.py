@@ -27,7 +27,7 @@ out = Path(args.out)
 ##### Functions #####
 #-----------------------------------------------------------
 def fundus(grade, width=150, height=118):
-    # Orange disc on a black, non-square canvas (so the crop and pad code is exercised),
+    # Orange disc on a black, non-square canvas so the crop and pad code is exercised,
     # dark vessels, a pale optic disc, red dots from grade 1 and yellow exudates from grade 3.
     img = np.zeros((height, width, 3), np.uint8)
     cx, cy, r = width // 2, height // 2, int(height * 0.45)
@@ -51,7 +51,7 @@ def fundus(grade, width=150, height=118):
     img = np.where(inside[..., None], np.clip(img + noise, 0, 255), img).astype(np.uint8)
     return img
 
-#---- ##-- APTOS layout, train.csv (id_code, diagnosis) + train_images/<id>.png ----
+#---- ##-- APTOS layout, train.csv with id_code and diagnosis + train_images/<id>.png ----
 aptos = out / "aptos"
 (aptos / "train_images").mkdir(parents=True, exist_ok=True)
 rows = []

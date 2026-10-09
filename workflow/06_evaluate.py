@@ -4,7 +4,7 @@
 #
 # Stage 06 chooses the threshold on validation for a target sensitivity, then evaluates once on test.
 # Sensitivity and specificity carry Wilson 95% intervals, AUROC a percentile bootstrap 95% interval.
-# Writes the model card (JSON), per-dataset metrics, test predictions and the confusion/ROC figure.
+# Writes the JSON model card, per-dataset metrics, test predictions and the confusion/ROC figure.
 
 import argparse
 import json

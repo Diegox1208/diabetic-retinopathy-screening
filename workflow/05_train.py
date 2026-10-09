@@ -2,7 +2,7 @@
 #### created by Diego G. Salas
 #### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cells "Paso 4" and "Paso 5"
 #
-# Stage 05 fine-tunes an ImageNet CNN (timm) for referable DR (ICDR >= 2), one sigmoid output.
+# Stage 05 fine-tunes an ImageNet CNN from timm for referable DR, ICDR >= 2, with one sigmoid output.
 # Keeps the weights of the epoch with the best validation AUROC. Saves a checkpoint every epoch,
 # and a rerun resumes from it only if the split and the parameters are identical.
 

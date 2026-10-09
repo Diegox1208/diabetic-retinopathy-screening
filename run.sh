@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #### created by Diego G. Salas
-#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb (Colab)
+#### adapted from the Colab notebook notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb
 #
 # Runs the whole pipeline end to end.
-#   bash run.sh                               -> synthetic test dataset (tests/), CPU, about a minute
+#   bash run.sh                               -> synthetic test dataset in tests/, CPU, about a minute
 #   CONFIG=config/config.sh bash run.sh       -> APTOS 2019 + EyePACS, training needs a GPU
 #   DRY_RUN=1 bash run.sh                     -> print every command, run nothing
 set -euo pipefail
