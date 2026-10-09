@@ -1,6 +1,5 @@
 {
   "version": "model_v1",
-  "fecha": "2026-09-22T22:01:35",
   "datos": "APTOS2019 (train 70% / val 15% / test 15%, estratificado por grado)",
   "tarea": "binaria: referible (ICDR>=2) vs no referible",
   "config": {

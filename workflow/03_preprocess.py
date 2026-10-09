@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-#### created by Diego G. Salas, 2026-10-08
-#### adapted from: notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cell "Paso 2 — Preprocesar las fotos"
+#### created by Diego G. Salas
+#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cell "Paso 2 — Preprocesar las fotos"
 #
-# Stage 03: crop the black border, pad to a square and resize every image once; optional CLAHE.
+# Stage 03 crops the black border, pads to a square and resizes every image once, with optional CLAHE.
 # Images already on disk are not redone, so an interrupted run resumes where it stopped.
 
 import argparse
@@ -36,7 +36,7 @@ if not Path(args.manifest).is_file():
 df = pd.read_csv(args.manifest, sep="\t", dtype={"image_id": str, "patient_id": str})
 out_dir = Path(args.out_dir)
 out_dir.mkdir(parents=True, exist_ok=True)
-# File names encode the parameters that change the pixels: size and CLAHE.
+# File names encode the parameters that change the pixels, size and CLAHE.
 suffix = f"_{args.size}px" + ("_clahe" if args.clahe else "")
 df["prep_path"] = [str(out_dir / f"{s}_{i.replace('/', '_')}{suffix}.jpg")
                    for s, i in zip(df["source_dataset"], df["image_id"])]

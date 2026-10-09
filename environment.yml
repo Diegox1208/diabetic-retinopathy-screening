@@ -1,9 +1,9 @@
-name: dr-referable-screening
+name: diabetic-retinopathy-screening
 channels:
   - conda-forge
 dependencies:
   - python=3.12
-  - pytorch=2.*          # CPU build on the laptop; the full runs used a Colab T4 GPU
+  - pytorch=2.*          # CPU build on the laptop, the full runs used a Colab T4 GPU
   - torchvision
   - timm
   - opencv
@@ -12,4 +12,4 @@ dependencies:
   - matplotlib
   - tqdm
   - kaggle
-  - unzip                # stage 01 extracts the APTOS archive; missing on a fresh WSL
+  - unzip                # stage 01 extracts the APTOS archive, missing on a fresh WSL

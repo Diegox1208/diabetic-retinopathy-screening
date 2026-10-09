@@ -1,7 +1,7 @@
-#### created by Diego G. Salas, 2026-10-08
-#### adapted from: notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb (Colab, 2026-10-07)
+#### created by Diego G. Salas
+#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb (Colab)
 #
-# Functions shared by the numbered stages: preprocessing, dataset, prediction, metrics.
+# Functions shared by the numbered stages for preprocessing, dataset, prediction and metrics.
 # Imported as `import retina` by the scripts in workflow/.
 
 import hashlib
@@ -54,7 +54,7 @@ def resolve_device(device):
 
 
 def fingerprint(image_ids):
-    # MD5 of the sorted image ids: proves a resumed run sees the same split.
+    # MD5 of the sorted image ids, proof that a resumed run sees the same split.
     return hashlib.md5("|".join(sorted(map(str, image_ids))).encode()).hexdigest()
 
 
@@ -62,7 +62,7 @@ def fingerprint(image_ids):
 #-----------------------------------------------------------
 # Each reader returns image_id, file_path, icdr_grade, patient_id, eye. Files are not opened here.
 def read_aptos(folder):
-    # APTOS 2019: train.csv with id_code, diagnosis; images in train_images/<id>.png. No patient id.
+    # APTOS 2019 has train.csv with id_code and diagnosis, images in train_images/<id>.png and no patient id.
     t = pd.read_csv(Path(folder) / "train.csv")
     return pd.DataFrame({
         "image_id": t["id_code"].astype(str),
@@ -74,8 +74,8 @@ def read_aptos(folder):
 
 
 def read_eyepacs(folder):
-    # EyePACS, two layouts: the 384 px Kaggle copy (etiquetas.csv: image_id, icdr_grade, patient_id, ojo;
-    # <id>.jpg next to it) or the 2015 competition (trainLabels.csv: image, level; train/<id>.jpeg).
+    # EyePACS comes in two layouts. The 384 px Kaggle copy has etiquetas.csv (image_id, icdr_grade, patient_id, ojo)
+    # with <id>.jpg next to it, the original Kaggle competition has trainLabels.csv (image, level) and train/<id>.jpeg.
     folder = Path(folder)
     copy = sorted(folder.rglob("etiquetas.csv"))
     if copy:
@@ -105,7 +105,7 @@ READERS = {"APTOS2019": read_aptos, "EyePACS": read_eyepacs}
 
 
 def unify(tables):
-    # Concatenates {dataset: table}; prefixes patient ids with the source (EyePACS ids are numbers,
+    # Concatenates the table of each dataset, prefixes patient ids with the source (EyePACS ids are numbers,
     # APTOS ids are hashes) and adds the binary label.
     df = pd.concat([t.assign(source_dataset=name) for name, t in tables.items()], ignore_index=True)
     df["patient_id"] = df["source_dataset"] + "_" + df["patient_id"].astype(str)
@@ -133,7 +133,7 @@ def split_by_patient(df, test_folds=7, val_folds=6, seed=42):
 ##### Preprocessing #####
 #-----------------------------------------------------------
 def preprocess_image(path, size=384, use_clahe=False, tolerance=10):
-    # Crops the black border, pads to a square, resizes; optional CLAHE on the L channel.
+    # Crops the black border, pads to a square and resizes, with optional CLAHE on the L channel.
     img = cv2.imread(str(path))
     if img is None:
         raise FileNotFoundError(path)
@@ -159,7 +159,7 @@ def preprocess_image(path, size=384, use_clahe=False, tolerance=10):
 ##### Dataset #####
 #-----------------------------------------------------------
 def build_transforms(train):
-    # Augmentation on train only; val and test are seen as they are.
+    # Augmentation on train only, val and test are seen as they are.
     if not train:
         return transforms.Compose([transforms.ToTensor(), transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD)])
     return transforms.Compose([
@@ -213,7 +213,7 @@ def wilson(successes, total, z=1.96):
 
 
 def auroc_bootstrap(y, p, n=1000, seed=0):
-    # AUROC with a percentile bootstrap 95% interval; resamples with one class are skipped.
+    # AUROC with a percentile bootstrap 95% interval. Resamples with one class are skipped.
     rng = np.random.default_rng(seed)
     values = []
     for _ in range(n):

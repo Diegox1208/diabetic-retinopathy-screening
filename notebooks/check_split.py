@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#### created by Diego G. Salas, 2026-10-08
+#### created by Diego G. Salas
 #
 # Checks that workflow/retina.py rebuilds the model_v3 patient split from labels alone.
 # StratifiedGroupKFold depends only on the set of (patient, grade) pairs, so no image is needed.

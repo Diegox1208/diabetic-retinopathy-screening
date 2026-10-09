@@ -1,6 +1,6 @@
-#### created by Diego G. Salas, 2026-10-08
-#### Test configuration: same variables as config/config.sh, pointing at tests/data (< 1 MB, synthetic).
-#### Small images, two epochs, no pretrained weights: checks that every stage runs, not that the model learns.
+#### created by Diego G. Salas
+#### Test configuration with the same variables as config/config.sh, pointing at tests/data (< 1 MB, synthetic).
+#### Small images, two epochs, no pretrained weights. It checks that every stage runs, not that the model learns.
 
 ##### Set variables
 repoDir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

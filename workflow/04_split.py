@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-#### created by Diego G. Salas, 2026-10-08
-#### adapted from: notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cell "Paso 3 — Dividir"
+#### created by Diego G. Salas
+#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cell "Paso 3 — Dividir"
 #
-# Stage 04: split train / validation / test by patient, stratified by ICDR grade.
+# Stage 04 splits train / validation / test by patient, stratified by ICDR grade.
 # No patient appears in two sets, so both eyes of one person stay together.
 
 import argparse

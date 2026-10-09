@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-#### created by Diego G. Salas, 2026-10-08
+#### created by Diego G. Salas
 #
-# Builds tests/data/raw: synthetic fundus-like images in the exact file layout of the two Kaggle
-# downloads, so every stage runs on a laptop without credentials. Not real retinas: no metric
+# Builds tests/data/raw with synthetic fundus-like images in the exact file layout of the two Kaggle
+# downloads, so every stage runs on a laptop without credentials. They are not real retinas, so no metric
 # computed on them says anything about diabetic retinopathy.
 #   python tests/make_test_data.py
 
@@ -28,7 +28,7 @@ out = Path(args.out)
 #-----------------------------------------------------------
 def fundus(grade, width=150, height=118):
     # Orange disc on a black, non-square canvas (so the crop and pad code is exercised),
-    # dark vessels, a pale optic disc; red dots from grade 1 and yellow exudates from grade 3.
+    # dark vessels, a pale optic disc, red dots from grade 1 and yellow exudates from grade 3.
     img = np.zeros((height, width, 3), np.uint8)
     cx, cy, r = width // 2, height // 2, int(height * 0.45)
     yy, xx = np.mgrid[:height, :width]
@@ -51,7 +51,7 @@ def fundus(grade, width=150, height=118):
     img = np.where(inside[..., None], np.clip(img + noise, 0, 255), img).astype(np.uint8)
     return img
 
-#---- ##-- APTOS layout: train.csv (id_code, diagnosis) + train_images/<id>.png ----
+#---- ##-- APTOS layout, train.csv (id_code, diagnosis) + train_images/<id>.png ----
 aptos = out / "aptos"
 (aptos / "train_images").mkdir(parents=True, exist_ok=True)
 rows = []
@@ -62,7 +62,7 @@ for grade in range(5):
         rows.append(dict(id_code=id_code, diagnosis=grade))
 pd.DataFrame(rows).to_csv(aptos / "train.csv", index=False)
 
-#---- ##-- EyePACS layout: eyepacs_384/etiquetas.csv + <patient>_<eye>.jpg, nested as Kaggle unzips it ----
+#---- ##-- EyePACS layout, eyepacs_384/etiquetas.csv + <patient>_<eye>.jpg, nested as Kaggle unzips it ----
 eyepacs = out / "eyepacs" / "eyepacs_384"
 eyepacs.mkdir(parents=True, exist_ok=True)
 rows = []

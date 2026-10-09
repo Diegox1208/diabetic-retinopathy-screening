@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-#### created by Diego G. Salas, 2026-10-08
-#### adapted from: notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cells "Paso 1"
+#### created by Diego G. Salas
+#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cells "Paso 1"
 #
-# Stage 01: download each dataset in the info file from Kaggle into ${rawDir}/<name>.
+# Stage 01 downloads each dataset in the info file from Kaggle into ${rawDir}/<name>.
 # Needs ~/.kaggle/kaggle.json and the APTOS competition rules accepted on kaggle.com.
 set -euo pipefail
 

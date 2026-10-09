@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-#### created by Diego G. Salas, 2026-10-08
-#### adapted from: notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cells "Paso 6" and "Paso 7"
+#### created by Diego G. Salas
+#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cells "Paso 6" and "Paso 7"
 #
-# Stage 06: choose the threshold on validation for a target sensitivity, then evaluate once on test.
-# Sensitivity and specificity carry Wilson 95% intervals; AUROC a percentile bootstrap 95% interval.
+# Stage 06 chooses the threshold on validation for a target sensitivity, then evaluates once on test.
+# Sensitivity and specificity carry Wilson 95% intervals, AUROC a percentile bootstrap 95% interval.
 # Writes the model card (JSON), per-dataset metrics, test predictions and the confusion/ROC figure.
 
 import argparse
-import datetime
 import json
 import sys
 from pathlib import Path
@@ -61,7 +60,7 @@ def metrics_at(y, p, threshold, n_boot):
 
 
 def plot_confusion_roc(m, y, p, version, file):
-    # Left: confusion matrix on a one-hue ramp. Right: ROC with the operating point labelled.
+    # Confusion matrix on a one-hue ramp on the left, ROC with the operating point labelled on the right.
     blue, ink, muted, surface = "#2a78d6", "#1f1f1e", "#6b6b68", "#fcfcfb"
     ramp = LinearSegmentedColormap.from_list("blue", ["#cde2fb", "#104281"])
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 5), facecolor=surface, layout="constrained",
@@ -84,7 +83,7 @@ def plot_confusion_roc(m, y, p, version, file):
     a2.plot(fpr, tpr, color=blue, linewidth=2)
     x0, y0 = 1 - m["specificity"][0], m["sensitivity"][0]
     a2.scatter([x0], [y0], s=64, color="#104281", edgecolor=surface, linewidth=2, zorder=3)
-    # Label inside the axes: to the right of the point, or to the left past the middle.
+    # Label inside the axes, to the right of the point, or to the left past the middle.
     right = x0 < 0.5
     a2.annotate(f"threshold\nsens {y0:.1%} · spec {1 - x0:.1%}", (x0, y0), xytext=(12 if right else -12, -28),
                 textcoords="offset points", ha="left" if right else "right", color=ink, fontsize=9)
@@ -151,7 +150,6 @@ params_file = Path(args.model_dir) / f"{args.version}_params.json"
 train_info = json.loads(params_file.read_text()) if params_file.is_file() else {}
 card = dict(
     version=args.version,
-    date=datetime.datetime.now().isoformat(timespec="seconds"),
     task="binary: referable (ICDR >= 2) vs not referable",
     data=" + ".join(sorted(df["source_dataset"].unique())),
     split="per patient, StratifiedGroupKFold on ICDR grade",

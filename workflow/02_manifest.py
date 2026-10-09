@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-#### created by Diego G. Salas, 2026-10-08
-#### adapted from: notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cells "Mirar los datos" to "Control de seguridad"
+#### created by Diego G. Salas
+#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cells "Mirar los datos" to "Control de seguridad"
 #
-# Stage 02: put every dataset in one schema and drop images whose file is missing.
-# Schema: image_id, source_dataset, file_path, icdr_grade, referable, patient_id, eye, device.
+# Stage 02 puts every dataset in one schema and drops images whose file is missing.
+# The schema has image_id, source_dataset, file_path, icdr_grade, referable, patient_id, eye, device.
 
 import argparse
 import sys

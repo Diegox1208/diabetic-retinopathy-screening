@@ -1,3 +1,3 @@
 dataset	name	accession	source
-APTOS2019	aptos	synthetic	tests/make_test_data.py; 40 synthetic fundus images, APTOS layout (train.csv + train_images/*.png)
-EyePACS	eyepacs	synthetic	tests/make_test_data.py; 20 synthetic patients x 2 eyes, EyePACS layout (etiquetas.csv + *.jpg)
+APTOS2019	aptos	synthetic	made by tests/make_test_data.py, 40 synthetic fundus images in the APTOS layout (train.csv + train_images/*.png)
+EyePACS	eyepacs	synthetic	made by tests/make_test_data.py, 20 synthetic patients x 2 eyes in the EyePACS layout (etiquetas.csv + *.jpg)

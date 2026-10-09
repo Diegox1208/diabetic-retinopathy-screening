@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-#### created by Diego G. Salas, 2026-10-08
-#### adapted from: the printed outputs of the archived Colab notebooks in this folder
-#
+#### created by Diego G. Salas
+
 # Extracts the metrics, training history and figures of the three Colab runs
 # (model_v1, model_v2, model_v3) into results/. Standard library only.
 #   python notebooks/extract_runs.py
@@ -30,13 +29,13 @@ fig_dir.mkdir(parents=True, exist_ok=True)
 # Each Colab run: which notebook printed it, and what data and split it used.
 runs = [
     dict(version="model_v1", source="results/model_v1.json", notebook=None,
-         data="APTOS2019", split="per image, 70/15/15, stratified by grade", date="2026-09-22"),
+         data="APTOS2019", split="per image, 70/15/15, stratified by grade"),
     dict(version="model_v2", source="notebooks/RD_01_primer_modelo_APTOS.ipynb",
          notebook="RD_01_primer_modelo_APTOS.ipynb",
-         data="APTOS2019 + EyePACS", split="per patient, StratifiedGroupKFold 6/7 then 5/6", date="2026-10-06"),
+         data="APTOS2019 + EyePACS", split="per patient, StratifiedGroupKFold 6/7 then 5/6"),
     dict(version="model_v3", source="notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb",
          notebook="RD_02_APTOS_EyePACS_v3_checkpoint.ipynb",
-         data="APTOS2019 + EyePACS", split="per patient, StratifiedGroupKFold 6/7 then 5/6", date="2026-10-07"),
+         data="APTOS2019 + EyePACS", split="per patient, StratifiedGroupKFold 6/7 then 5/6"),
 ]
 
 #---- ##-- Functions ----
@@ -137,7 +136,7 @@ for run in runs:
             print(f"figure\t{fig_dir / name}")
 
     best = max(history, key=lambda h: h["val_auroc"])
-    summary_rows.append(dict(version=run["version"], date=run["date"], data=run["data"], split=run["split"],
+    summary_rows.append(dict(version=run["version"], data=run["data"], split=run["split"],
                              **{f"printed_{k}_images": split.get(k, ("", ""))[0] for k in ("train", "val", "test")},
                              **{f"printed_{k}_referable": split.get(k, ("", ""))[1] for k in ("train", "val", "test")},
                              **row,

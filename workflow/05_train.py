@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-#### created by Diego G. Salas, 2026-10-08
-#### adapted from: notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cells "Paso 4" and "Paso 5"
+#### created by Diego G. Salas
+#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cells "Paso 4" and "Paso 5"
 #
-# Stage 05: fine-tune an ImageNet CNN (timm) for referable DR (ICDR >= 2), one sigmoid output.
-# Keeps the weights of the epoch with the best validation AUROC. Saves a checkpoint every epoch;
-# a rerun resumes from it only if the split and the parameters are identical.
+# Stage 05 fine-tunes an ImageNet CNN (timm) for referable DR (ICDR >= 2), one sigmoid output.
+# Keeps the weights of the epoch with the best validation AUROC. Saves a checkpoint every epoch,
+# and a rerun resumes from it only if the split and the parameters are identical.
 
 import argparse
 import copy
@@ -124,7 +124,7 @@ for epoch in range(first_epoch, args.epochs + 1):
         best_auc, best_weights, mark = val_auc, copy.deepcopy(model.state_dict()), "\tbest"
     print(f"epoch {epoch:2d}/{args.epochs}\ttrain loss {train_loss:.4f}\tval AUROC {val_auc:.4f}\t{seconds}s{mark}", flush=True)
 
-    ##### Checkpoint: write to a temporary file first so an interruption never leaves it corrupt
+    ##### Checkpoint, written to a temporary file first so an interruption never leaves it corrupt
     tmp = str(ckpt_file) + ".tmp"
     torch.save(dict(epoch=epoch, model=model.state_dict(), optimizer=optimizer.state_dict(),
                     scheduler=scheduler.state_dict(), scaler=scaler.state_dict(), history=history,
