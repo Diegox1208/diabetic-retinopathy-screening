@@ -27,15 +27,13 @@ out = Path(args.out)
 ##### Functions #####
 #-----------------------------------------------------------
 def fundus(grade, width=150, height=118):
-    # Orange disc on a black, non-square canvas so the crop and pad code is exercised,
-    # dark vessels, a pale optic disc, red dots from grade 1 and yellow exudates from grade 3.
     img = np.zeros((height, width, 3), np.uint8)
     cx, cy, r = width // 2, height // 2, int(height * 0.45)
     yy, xx = np.mgrid[:height, :width]
     dist = np.sqrt((xx - cx) ** 2 + (yy - cy) ** 2) / r
     inside = dist <= 1
     shade = np.clip(1.1 - 0.5 * dist, 0, 1)
-    img[inside] = (np.stack([30 * shade, 90 * shade, 200 * shade], -1)[inside]).astype(np.uint8)   # BGR
+    img[inside] = (np.stack([30 * shade, 90 * shade, 200 * shade], -1)[inside]).astype(np.uint8)
     disc = (cx + int(r * 0.45 * rng.choice([-1, 1])), cy)
     for _ in range(4):
         end = (int(cx + rng.uniform(-r, r) * 0.8), int(cy + rng.uniform(-r, r) * 0.8))

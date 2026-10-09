@@ -15,7 +15,7 @@ stage="01_download"
 
 #---- ##-- Loop over datasets ----
 while IFS=$'\t' read -r dataset name accession source; do
-  [[ "${dataset}" == "dataset" || -z "${dataset}" ]] && continue      # header or blank line
+  [[ "${dataset}" == "dataset" || -z "${dataset}" ]] && continue
 
   outDir="${rawDir}/${name}"
   if [[ -d "${outDir}" ]] && [[ -n "$(ls -A "${outDir}")" ]]; then

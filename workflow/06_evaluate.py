@@ -48,7 +48,6 @@ for f in (Path(args.split), weights_file):
 ##### Functions #####
 #-----------------------------------------------------------
 def metrics_at(y, p, threshold, n_boot):
-    # Confusion counts, Wilson intervals and bootstrap AUROC at a fixed threshold.
     tn, fp, fn, tp = confusion_matrix(y, (p >= threshold).astype(int), labels=[0, 1]).ravel()
     sens, spec = retina.wilson(tp, tp + fn), retina.wilson(tn, tn + fp)
     auc = retina.auroc_bootstrap(y, p, n=n_boot) if len(np.unique(y)) == 2 else (float("nan"),) * 3
@@ -60,7 +59,6 @@ def metrics_at(y, p, threshold, n_boot):
 
 
 def plot_confusion_roc(m, y, p, version, file):
-    # Confusion matrix on a one-hue ramp on the left, ROC with the operating point labelled on the right.
     blue, ink, muted, surface = "#2a78d6", "#1f1f1e", "#6b6b68", "#fcfcfb"
     ramp = LinearSegmentedColormap.from_list("blue", ["#cde2fb", "#104281"])
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 5), facecolor=surface, layout="constrained",
@@ -83,7 +81,6 @@ def plot_confusion_roc(m, y, p, version, file):
     a2.plot(fpr, tpr, color=blue, linewidth=2)
     x0, y0 = 1 - m["specificity"][0], m["sensitivity"][0]
     a2.scatter([x0], [y0], s=64, color="#104281", edgecolor=surface, linewidth=2, zorder=3)
-    # Label inside the axes, to the right of the point, or to the left past the middle.
     right = x0 < 0.5
     a2.annotate(f"threshold\nsens {y0:.1%} · spec {1 - x0:.1%}", (x0, y0), xytext=(12 if right else -12, -28),
                 textcoords="offset points", ha="left" if right else "right", color=ink, fontsize=9)
@@ -119,7 +116,7 @@ with retina.Timer("Threshold on validation"):
     p_val, y_val = retina.predict(model, loader(val), device)
     fpr_v, tpr_v, thresholds_v = roc_curve(y_val, p_val)
     idx = np.where(tpr_v >= args.target_sensitivity)[0][0]
-    threshold = float(min(thresholds_v[idx], 1.0))      # roc_curve puts inf as the first threshold
+    threshold = float(min(thresholds_v[idx], 1.0))
     print(f"threshold\t{threshold:.4f}\t(validation sensitivity >= {args.target_sensitivity})")
 
 with retina.Timer("Test"):

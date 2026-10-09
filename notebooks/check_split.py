@@ -13,7 +13,7 @@ import pandas as pd
 
 repo_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(repo_dir / "workflow"))
-import retina  # noqa: E402
+import retina
 
 #---- ##-- Configuration ----
 parser = argparse.ArgumentParser(description=__doc__)

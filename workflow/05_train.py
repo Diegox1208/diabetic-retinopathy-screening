@@ -49,14 +49,13 @@ if weights_file.is_file():
     sys.exit(0)
 Path(args.model_dir).mkdir(parents=True, exist_ok=True)
 
-# Parameters that must match for a checkpoint to be resumed.
 params = {k: v for k, v in vars(args).items() if k not in ("num_workers", "device", "history", "model_dir", "split")}
 
 ##### Libraries #####
 #-----------------------------------------------------------
 retina.set_seed(args.seed)
 device = retina.resolve_device(args.device)
-use_amp = device.type == "cuda"                 # mixed precision, about 2x faster on a GPU
+use_amp = device.type == "cuda"
 print(f"device\t{device}\ttorch {torch.__version__}\ttimm {timm.__version__}")
 
 ##### Data files #####

@@ -26,7 +26,6 @@ results_dir = Path(args.results)
 fig_dir = results_dir / "figures"
 fig_dir.mkdir(parents=True, exist_ok=True)
 
-# Each Colab run, with the notebook that printed it and the data and split it used.
 runs = [
     dict(version="model_v1", source="results/model_v1.json", notebook=None,
          data="APTOS2019", split="per image, 70/15/15, stratified by grade"),
@@ -40,7 +39,6 @@ runs = [
 
 #---- ##-- Functions ----
 def cell_outputs(cell):
-    # Concatenated text of every stream output of a code cell.
     return "".join("".join(o.get("text", "")) for o in cell.get("outputs", []) if o.get("output_type") == "stream")
 
 
@@ -54,7 +52,6 @@ def pct(s):
 
 
 def parse_test_block(text):
-    # Parses the "RESULTADO REAL" block printed by the evaluation cell.
     num = r"([\d.]+)"
     m = dict(
         threshold=re.search(r"Umbral elegido \(en validación\): " + num, text),
@@ -85,7 +82,6 @@ def parse_history(text):
 
 
 def parse_split(text):
-    # Reads the image count and referable share of each split from the printed output.
     names = {"Entrenamiento": "train", "Validación": "val", "Prueba": "test"}
     found = re.findall(r"(Entrenamiento|Validación|Prueba)\s*:\s*(\d+) fotos \| referibles: (\d+)%", text)
     return {names[k]: (int(n), int(r) / 100) for k, n, r in found}

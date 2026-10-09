@@ -16,22 +16,22 @@ infoFile="${repoDir}/config/datasets.tsv"
 ##### Model parameters
 version="model_v3"
 architecture="efficientnet_b0"
-pretrained=1                 # ImageNet weights from timm
+pretrained=1
 imageSize=384
 batchSize=32
 epochs=12
 learningRate=3e-4
 seed=42
 useClahe=0
-targetSensitivity=0.90       # threshold chosen on validation to reach this sensitivity
-testFolds=7                  # StratifiedGroupKFold, 1 of 7 folds is test, about 14%
-valFolds=6                   # then 1 of 6 remaining folds is validation, about 14%
+targetSensitivity=0.90
+testFolds=7
+valFolds=6
 bootstrapN=1000
-device="auto"                # cuda if available, else cpu
+device="auto"
 
 ##### Global parameters
-threads=8                    # preprocessing workers
-numWorkers=2                 # DataLoader workers
+threads=8
+numWorkers=2
 
 ##### Timestamp and log
 day="$(date +%Y%m%d)"

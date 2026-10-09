@@ -36,7 +36,6 @@ if not Path(args.manifest).is_file():
 df = pd.read_csv(args.manifest, sep="\t", dtype={"image_id": str, "patient_id": str})
 out_dir = Path(args.out_dir)
 out_dir.mkdir(parents=True, exist_ok=True)
-# File names encode the parameters that change the pixels, size and CLAHE.
 suffix = f"_{args.size}px" + ("_clahe" if args.clahe else "")
 df["prep_path"] = [str(out_dir / f"{s}_{i.replace('/', '_')}{suffix}.jpg")
                    for s, i in zip(df["source_dataset"], df["image_id"])]
