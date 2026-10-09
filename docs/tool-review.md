@@ -17,11 +17,25 @@ Diego G. Salas · versions tested are torch 2.13.0 on CPU, timm 1.0.30 and sciki
 
 ## Where it fails
 
-- **Notebook state.** The model_v2 run printed a split with 5 540 test images and then evaluated 5 018. Its training log is identical to model_v3's to four decimals, yet its validation threshold differs, 0.021 vs 0.057, so the evaluation cell ran on objects left by an earlier execution. Numbered scripts that read their inputs from disk remove this class of error.
-- **Scheduler warning with mixed precision.** PyTorch warns that `lr_scheduler.step()` ran before `optimizer.step()`. `GradScaler` skips the optimiser step when the first batch overflows in float16, so the cosine schedule runs one step ahead. Over 10 392 steps, 866 per epoch for 12 epochs, the effect is negligible, and the order was kept to stay faithful to the Colab runs.
-- **Low operating threshold.** Reaching 90% sensitivity on validation required a threshold of 0.057 in model_v3. The metric is valid, but the probabilities are not calibrated as risks, and calibration was not measured.
-- **Pretrained weights need the network.** timm fetches 21.4 MB from the Hugging Face Hub, with an unauthenticated warning in Colab. Offline machines need a cached copy or `pretrained=0`.
-- **Group split with one image per patient.** APTOS publishes no patient id, so grouping protects only EyePACS eyes. For APTOS the split is still per image.
+### Notebook state
+
+The model_v2 run printed a split with 5 540 test images and then evaluated 5 018. Its training log is identical to model_v3's to four decimals, yet its validation threshold differs, 0.021 vs 0.057, so the evaluation cell ran on objects left by an earlier execution. Numbered scripts that read their inputs from disk remove this class of error.
+
+### Scheduler warning with mixed precision
+
+PyTorch warns that `lr_scheduler.step()` ran before `optimizer.step()`. `GradScaler` skips the optimiser step when the first batch overflows in float16, so the cosine schedule runs one step ahead. Over 10 392 steps, 866 per epoch for 12 epochs, the effect is negligible, and the order was kept to stay faithful to the Colab runs.
+
+### Low operating threshold
+
+Reaching 90% sensitivity on validation required a threshold of 0.057 in model_v3. The metric is valid, but the probabilities are not calibrated as risks, and calibration was not measured.
+
+### Pretrained weights need the network
+
+timm fetches 21.4 MB from the Hugging Face Hub, with an unauthenticated warning in Colab. Offline machines need a cached copy or `pretrained=0`.
+
+### Group split with one image per patient
+
+APTOS publishes no patient id, so grouping protects only EyePACS eyes. For APTOS the split is still per image.
 
 ## Alternative
 

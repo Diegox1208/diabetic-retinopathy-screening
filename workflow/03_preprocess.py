@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #### created by Diego G. Salas
-#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cell "Paso 2 — Preprocesar las fotos"
+#### adapted from notebooks/RD_02_APTOS_EyePACS_v3_checkpoint.ipynb, cell "Paso 2. Preprocesar las fotos"
 #
 # Stage 03 crops the black border, pads to a square and resizes every image once, with optional CLAHE.
 # Images already on disk are not redone, so an interrupted run resumes where it stopped.
